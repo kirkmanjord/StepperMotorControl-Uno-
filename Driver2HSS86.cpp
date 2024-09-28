@@ -1,11 +1,9 @@
 #include <Arduino.h>
 #include "Driver2HSS86.h"
 // Global variables for the stepper driver pins and movement tracking (ease of use/ simplicity)
-extern int ena = 6;// Enable pin number for stepper motor driver
-extern int pul = 5;// Pulse pin number for stepper motor driver
-extern int dir = 4;// Direction pin number for stepper motor driver
-extern long distFromTarget = 0;// Distance remaining to target position (in pulses)
-extern long count=0;// Pulse counter for tracking progress
+// Declare the global driver object without initializing it
+Driver2HSS86 driver(0, 0, 0, 0);
+
 /**
  * @brief Constructor for the Driver2HSS86 class.
  * 
@@ -14,14 +12,35 @@ extern long count=0;// Pulse counter for tracking progress
  * 
  * @param pulsesPerRevolution Number of pulses required for one full revolution of the stepper motor.
  */
-Driver2HSS86::Driver2HSS86(long pulsesPerRevolution){
-  pulsesPerRev = pulsesPerRevolution;  // Store pulses per revolution
+Driver2HSS86::Driver2HSS86(int pulsePin, int directionPin, int enablePin, long pulsesPerRevolution){
+  ena = enablePin;
+    pul = pulsePin;
+    dir = directionPin;
+    pulsesPerRev = pulsesPerRevolution; // Store pulses per revolution
+    distFromTarget = 0;// Distance remaining to target position (in pulses)
+    count=0;// Pulse counter for tracking progress
   pinMode(pul, OUTPUT); // Set pulse pin as output
   pinMode(dir,OUTPUT);// Set direction pin as output
   pinMode(ena, OUTPUT); // Set enable pin as output
   digitalWrite(pul, LOW);// Set pulse pin LOW
   digitalWrite(dir, LOW);// Set direction pin LOW
   digitalWrite(ena, LOW);// Set enable pin LOW (disabled)
+  
+}
+Driver2HSS86 Driver2HSS86::createAndAssignDriver(int pulsePin, int directionPin, int enablePin, long pulsesPerRevolution) {
+    // Create a new driver object and assign it to the global driver
+    driver.pul = pulsePin;
+    driver.dir = directionPin;
+    driver.ena = enablePin;
+    driver.pulsesPerRev = pulsesPerRevolution;
+    pinMode(driver.pul, OUTPUT); // Set pulse pin as output
+  pinMode(driver.dir,OUTPUT);// Set direction pin as output
+  pinMode(driver.ena, OUTPUT); // Set enable pin as output
+    
+    
+
+    // Return the newly created driver
+    return driver;
 }
 /**
  * @brief Enables the stepper motor driver by setting the enable pin HIGH.
@@ -112,7 +131,7 @@ void Driver2HSS86::setPos(float revsPerMinute, int degrees){
   TIMSK1 |= (1<<OCIE1B);   // Enable Timer1 Compare B interrupt
   TCNT1 = 0; // Reset the timer counter
   OCR1B = comp; // Set the compare value
-  distFromTarget = (degrees/360.00) *(pulsesPerRev);
+  driver.distFromTarget = (degrees/360.00) *(pulsesPerRev);
   interrupts();
 
 
@@ -226,22 +245,22 @@ ISR(TIMER1_COMPB_vect){
   //reset timer, if pin is high, set pin low
   //if off, if the distance from target is more than 0, set the pulse pin high and decrement the distance from target
   //else, it is at the target and the interupts are turned off
-  if (digitalRead(5)){
-    digitalWrite(5,LOW);
+  if (digitalRead(driver.pul)){
+    digitalWrite(driver.pul,LOW);
 
   }else{
-    if (distFromTarget == 0){
+    if (driver.distFromTarget == 0){
+      
        TIMSK1 ^= (1<<OCIE1B);
        digitalWrite(5,LOW);
     }else{
-    digitalWrite(5, HIGH);
-    count++;
+    digitalWrite(driver.pul, HIGH);
+    driver.count++;
     
 
-    distFromTarget -= 1;
+    driver.distFromTarget -= 1;
     }
   }
   
   
 }
-
