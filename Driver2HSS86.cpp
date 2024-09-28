@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "Driver2HSS86.h"
-// Global variables for the stepper driver pins and movement tracking
+// Global variables for the stepper driver pins and movement tracking (ease of use/ simplicity)
 extern int ena = 6;// Enable pin number for stepper motor driver
 extern int pul = 5;// Pulse pin number for stepper motor driver
 extern int dir = 4;// Direction pin number for stepper motor driver
@@ -244,3 +244,4 @@ ISR(TIMER1_COMPB_vect){
   
   
 }
+
