@@ -2,7 +2,7 @@
 #define DRIVER2HSS86_H
 #include <Arduino.h>
 
-// External global variables for pulse, direction, enable, and distance tracking
+// External global variables for pulse, direction, enable, and distance tracking( ease of use/ simplicity)
 extern int pul;// Pulse pin number for stepper motor driver
 extern int dir;// Direction pin number for stepper motor driver
 extern int ena;// Enable pin number for stepper motor driver
