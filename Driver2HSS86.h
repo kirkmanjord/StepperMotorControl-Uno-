@@ -2,12 +2,8 @@
 #define DRIVER2HSS86_H
 #include <Arduino.h>
 
-// External global variables for pulse, direction, enable, and distance tracking( ease of use/ simplicity)
-extern int pul;// Pulse pin number for stepper motor driver
-extern int dir;// Direction pin number for stepper motor driver
-extern int ena;// Enable pin number for stepper motor driver
-extern long distFromTarget; // Distance remaining from the target position (in pulses)
-extern long count; // Counter to track the number of pulses sent to the motor
+
+
 /**
  * @brief Driver class for controlling the HSS86 stepper driver.
  * 
@@ -21,7 +17,7 @@ class Driver2HSS86{
      * 
      * @param pulsesPerRevolution The number of pulses required for one full revolution of the stepper motor.
      */
-  Driver2HSS86(long pulsesPerRevolution);
+  Driver2HSS86(int pulsePin, int directionPin, int enablePin, long pulsesPerRevolution);
    /**
      * @brief Set the speed of the stepper motor in revolutions per minute (RPM).
      * 
@@ -105,10 +101,19 @@ class Driver2HSS86{
      * @param degrees The target position in degrees to move the motor.
      */
   void setPos(float revsPerMinute, int degrees);
+  static Driver2HSS86 createAndAssignDriver(int pulsePin, int directionPin, int enablePin, long pulsesPerRevolution);
+ int ena;  // Enable pin number for stepper motor driver
+  int pul;  // Pulse pin number for stepper motor driver
+  int dir;  // Direction pin number for stepper motor driver
+  long pulsesPerRev;  // Pulses per revolution
+  long distFromTarget;  // Distance remaining to target position (in pulses)
+  long count;  // Pulse counter for tracking progress
   
   private:
-  long pulsesPerRev;// Number of pulses required for one full revolution of the motor
+  
+
 };
+extern Driver2HSS86 driver;
 /**
  * @brief Interrupt Service Routine for Timer1 Compare Match A.
  * 
